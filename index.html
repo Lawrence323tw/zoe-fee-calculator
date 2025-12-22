@@ -4,14 +4,141 @@
 <head>
     <meta charset="UTF-8" />
     <title>佐境場租費計算器</title>
-    <style>
-        body { font-family: "Microsoft JhengHei", Arial, sans-serif; line-height: 1.6; padding: 12px; }
-        label { display: inline-block; width: 120px; }
-        .row { margin: 6px 0; }
-        select, input, button { margin-bottom: 8px; }
-        #result { margin-top: 16px; font-weight: bold; }
+    <!-- 讓手機正常縮放顯示，不會太小 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        /* 隱藏數字輸入的上下微調按鈕（保留，雖然此版不用 number） */
+    <style>
+        :root {
+            /* 調整整體字級與間距（行動裝置友善） */
+            --font-size: 16px;
+            --radius: 10px;
+            --gap: 12px;
+            --control-height: 44px;
+        }
+
+        /* 深色模式支援 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                color-scheme: dark;
+            }
+            body {
+                background: #111;
+                color: #eee;
+            }
+            select, input, button {
+                background: #1c1c1c;
+                color: #eee;
+                border-color: #333;
+            }
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            line-height: 1.6;
+            padding: 16px;
+            font-size: var(--font-size);
+            -webkit-text-size-adjust: 100%; /* iOS 文字大小穩定 */
+        }
+
+        .container {
+            max-width: 680px;   /* 桌面上居中 */
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 12px 0;
+            font-size: 1.25rem;
+        }
+
+        /* 區塊：每一列 */
+        .row {
+            display: grid;
+            grid-template-columns: 1fr; /* 手機：直排 */
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        /* 標籤在手機改為區塊，不固定寬度 */
+        label {
+            display: block;
+            font-weight: 600;
+        }
+
+        /* 控制元件一致的外觀與可點擊尺寸 */
+        select, input[type="radio"], button {
+            font-size: 1rem;
+        }
+        select {
+            width: 100%;
+            height: var(--control-height);
+            border-radius: var(--radius);
+            border: 1px solid #ccc;
+            padding: 0 12px;
+        }
+
+        /* 單選群組的外框 */
+        fieldset {
+            border: 1px solid #ddd;
+            border-radius: var(--radius);
+            padding: 10px 12px;
+        }
+        legend {
+            padding: 0 6px;
+            font-weight: 600;
+        }
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            background: #f5f5f5;
+        }
+        @media (prefers-color-scheme: dark) {
+            .radio-item {
+                background: #222;
+            }
+        }
+
+        /* 按鈕 */
+        #calcBtn {
+            width: 100%;
+            height: var(--control-height);
+            border-radius: var(--radius);
+            border: none;
+            background: #2f7cf2;
+            color: white;
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+        #calcBtn:active {
+            transform: scale(0.995);
+        }
+
+        /* 結果 */
+        #result {
+            margin-top: 14px;
+            font-weight: bold;
+            line-height: 1.8;
+        }
+
+        /* 桌面/大螢幕優化：標籤與控制同列 */
+        @media (min-width: 560px) {
+            .row {
+                grid-template-columns: 160px 1fr; /* 左標籤 + 右控制 */
+                align-items: center;
+            }
+            label {
+                margin: 0; /* 恢復成左側標籤 */
+            }
+        }
+
+        /* 隱藏數字輸入的上下微調按鈕（保留現有行為） */
         input[type=number]::-webkit-outer-spin-button,
         input[type=number]::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -24,57 +151,67 @@
     </style>
 </head>
 <body>
-    <h2>場租費線上計算器</h2>
+    <div class="container">
+        <h2>場租費線上計算器</h2>
 
-    <!-- 方案：單選 -->
-    <div class="row">
-        方案：
-        <label><input type="radio" name="mode" value="hall" checked> 大廳</label>
-        <label><input type="radio" name="mode" value="banquet"> 包場</label>
+        <!-- 方案：單選 -->
+        <fieldset class="row">
+            <legend>方案</legend>
+            <div class="radio-group" role="radiogroup" aria-label="方案">
+                <label class="radio-item">
+                    <input type="radio" name="mode" value="hall" checked>
+                    <span>大廳</span>
+                </label>
+                <label class="radio-item">
+                    <input type="radio" name="mode" value="banquet">
+                    <span>包場</span>
+                </label>
+            </div>
+        </fieldset>
+
+        <!-- 星期（僅下拉） -->
+        <div class="row">
+            <label for="weekdaySelect">星期</label>
+            <select id="weekdaySelect">
+                <option value="" selected disabled>請選擇</option>
+                <option value="1">星期一</option>
+                <option value="2">星期二</option>
+                <option value="3">星期三</option>
+                <option value="4">星期四</option>
+                <option value="5">星期五</option>
+                <option value="6">星期六</option>
+                <option value="7">星期日</option>
+            </select>
+        </div>
+
+        <!-- 人數（僅下拉：1~20） -->
+        <div class="row">
+            <label for="peopleSelect">人數</label>
+            <select id="peopleSelect">
+                <option value="" selected disabled>請選擇</option>
+                <option value="1">1人</option><option value="2">2人</option><option value="3">3人</option><option value="4">4人</option>
+                <option value="5">5人</option><option value="6">6人</option><option value="7">7人</option><option value="8">8人</option>
+                <option value="9">9人</option><option value="10">10人</option><option value="11">11人</option><option value="12">12人</option>
+                <option value="13">13人</option><option value="14">14人</option><option value="15">15人</option><option value="16">16人</option>
+                <option value="17">17人</option><option value="18">18人</option><option value="19">19人</option><option value="20">20人</option>
+            </select>
+        </div>
+
+        <!-- 小時（僅下拉：3~12） -->
+        <div class="row">
+            <label for="hourSelect">小時</label>
+            <select id="hourSelect">
+                <option value="" selected disabled>請選擇</option>
+                <option value="3">3小時</option><option value="4">4小時</option><option value="5">5小時</option>
+                <option value="6">6小時</option><option value="7">7小時</option><option value="8">8小時</option>
+                <option value="9">9小時</option><option value="10">10小時</option><option value="11">11小時</option>
+                <option value="12">12小時</option>
+            </select>
+        </div>
+
+        <button id="calcBtn">計算</button>
+        <div id="result" aria-live="polite"></div>
     </div>
-
-    <!-- 星期（僅下拉） -->
-    <div class="row">
-        <label for="weekdaySelect">星期：</label>
-        <select id="weekdaySelect">
-            <option value="" selected disabled>請選擇</option>
-            <option value="1">星期一</option>
-            <option value="2">星期二</option>
-            <option value="3">星期三</option>
-            <option value="4">星期四</option>
-            <option value="5">星期五</option>
-            <option value="6">星期六</option>
-            <option value="7">星期日</option>
-        </select>
-    </div>
-
-    <!-- 人數（僅下拉：1~20） -->
-    <div class="row">
-        <label for="peopleSelect">人數：</label>
-        <select id="peopleSelect">
-            <option value="" selected disabled>請選擇</option>
-            <option value="1">1人</option><option value="2">2人</option><option value="3">3人</option><option value="4">4人</option>
-            <option value="5">5人</option><option value="6">6人</option><option value="7">7人</option><option value="8">8人</option>
-            <option value="9">9人</option><option value="10">10人</option><option value="11">11人</option><option value="12">12人</option>
-            <option value="13">13人</option><option value="14">14人</option><option value="15">15人</option><option value="16">16人</option>
-            <option value="17">17人</option><option value="18">18人</option><option value="19">19人</option><option value="20">20人</option>
-        </select>
-    </div>
-
-    <!-- 小時（僅下拉：3~12） -->
-    <div class="row">
-        <label for="hourSelect">小時：</label>
-        <select id="hourSelect">
-            <option value="" selected disabled>請選擇</option>
-            <option value="3">3小時</option><option value="4">4小時</option><option value="5">5小時</option>
-            <option value="6">6小時</option><option value="7">7小時</option><option value="8">8小時</option>
-            <option value="9">9小時</option><option value="10">10小時</option><option value="11">11小時</option>
-            <option value="12">12小時</option>
-        </select>
-    </div>
-
-    <button id="calcBtn">計算</button>
-    <div id="result"></div>
 
 <script>
 /* --- 取得元素 --- */
