@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <title>佐境場租費計算器</title>
+    <style>
+        body { font-family: "Microsoft JhengHei", Arial, sans-serif; line-height: 1.6; padding: 12px; }
+        label { display: inline-block; width: 120px; }
+        .row { margin: 6px 0; }
+        select, input, button { margin-bottom: 8px; }
+        #result { margin-top: 16px; font-weight: bold; }
+
+        /* 隱藏數字輸入的上下微調按鈕（保留，雖然此版不用 number） */
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield; /* Firefox */
+            appearance: textfield;
+        }
+    </style>
+</head>
+<body>
+    <h2>場租費線上計算器</h2>
+
+    <!-- 方案：單選 -->
+    <div class="row">
+        方案：
+        <label><input type="radio" name="mode" value="hall" checked> 大廳</label>
+        <label><input type="radio" name="mode" value="banquet"> 包場</label>
+    </div>
+
+    <!-- 星期（僅下拉） -->
+    <div class="row">
+        <label for="weekdaySelect">星期：</label>
+        <select id="weekdaySelect">
+            <option value="" selected disabled>請選擇</option>
+            <option value="1">星期一</option>
+            <option value="2">星期二</option>
+            <option value="3">星期三</option>
+            <option value="4">星期四</option>
+            <option value="5">星期五</option>
+            <option value="6">星期六</option>
+            <option value="7">星期日</option>
+        </select>
+    </div>
+
+    <!-- 人數（僅下拉：1~20） -->
+    <div class="row">
+        <label for="peopleSelect">人數：</label>
+        <select id="peopleSelect">
+            <option value="" selected disabled>請選擇</option>
+            <option value="1">1人</option><option value="2">2人</option><option value="3">3人</option><option value="4">4人</option>
+            <option value="5">5人</option><option value="6">6人</option><option value="7">7人</option><option value="8">8人</option>
+            <option value="9">9人</option><option value="10">10人</option><option value="11">11人</option><option value="12">12人</option>
+            <option value="13">13人</option><option value="14">14人</option><option value="15">15人</option><option value="16">16人</option>
+            <option value="17">17人</option><option value="18">18人</option><option value="19">19人</option><option value="20">20人</option>
+        </select>
+    </div>
+
+    <!-- 小時（僅下拉：3~12） -->
+    <div class="row">
+        <label for="hourSelect">小時：</label>
+        <select id="hourSelect">
+            <option value="" selected disabled>請選擇</option>
+            <option value="3">3小時</option><option value="4">4小時</option><option value="5">5小時</option>
+            <option value="6">6小時</option><option value="7">7小時</option><option value="8">8小時</option>
+            <option value="9">9小時</option><option value="10">10小時</option><option value="11">11小時</option>
+            <option value="12">12小時</option>
+        </select>
+    </div>
+
+    <button id="calcBtn">計算</button>
+    <div id="result"></div>
+
+<script>
+/* --- 取得元素 --- */
+const weekdaySelect = document.getElementById('weekdaySelect');
+const peopleSelect = document.getElementById('peopleSelect');
+const hourSelect = document.getElementById('hourSelect');
+const calcBtn = document.getElementById('calcBtn');
+
+/* --- 規則：選擇大廳且人數 >= 6，強制切換到包場 --- */
+peopleSelect.addEventListener('change', () => {
+    const mode = document.querySelector('input[name="mode"]:checked')?.value;
+    const peopleNum = normalizePeople();
+    if (mode === 'hall' && peopleNum >= 6) {
+        document.querySelector('input[name="mode"][value="banquet"]').checked = true;
+    }
+});
+
+calcBtn.addEventListener('click', calc);
+
+/* --- 主計算 --- */
+function calc() {
+    const resultDiv = document.getElementById('result');
+    const mode = document.querySelector('input[name="mode"]:checked')?.value; // "hall" / "banquet"
+
+    const weekday = normalizeWeekday(); // 1~7
+    let people = normalizePeople();     // 1~20
+    const hour = normalizeHour();       // 3~12
+
+    // 若選擇大廳且人數 >= 6，強制切換到包場
+    if (mode === 'hall' && people >= 6) {
+        document.querySelector('input[name="mode"][value="banquet"]').checked = true;
+    }
+    const finalMode = document.querySelector('input[name="mode"]:checked')?.value;
+
+    // 檢核
+    if (!finalMode || weekday == null || people == null || hour == null) {
+        resultDiv.innerHTML = "輸入不完整或不正確。";
+        return;
+    }
+    if (people < 1 || people > 20) {
+        resultDiv.innerHTML = "人數需為 1–20。";
+        return;
+    }
+    if (hour < 3 || hour > 12) {
+        resultDiv.innerHTML = "小時需為 3–12。";
+        return;
+    }
+
+    const holiday = (weekday >= 6); // 6,7 為假日
+    let base = 0;   // 基礎費（不含加時）
+    let extra = 0;  // 加時費
+    let total = 0;
+
+    if (finalMode === "banquet") {
+        // 包場：依「總金額表」計算基礎費，再加上加時費（第 4 小時起）
+        const baseTotal = getBanquetBaseTotal(people, holiday);
+        if (baseTotal == null) {
+            resultDiv.innerHTML = "包場人數超過上限（20 人）。";
+            return;
+        }
+        base = baseTotal;
+
+        const extraRatePerPerson = holiday ? 60 : 50; // 第 4 小時起
+        const extraHours = Math.max(0, hour - 3);
+        extra = extraRatePerPerson * people * extraHours;
+        total = base + extra;
+    } else { // 大廳
+        // 大廳：原則上 1–4 人；5 人用「4 人的每人價格」計算；6+ 強制包場（上面已切換）
+        let peopleForRate = people;
+        if (people === 5) peopleForRate = 4; // 用 4 人的每人價格（但仍乘以 5 人數）
+        if (people > 5) {
+            resultDiv.innerHTML = "大廳人數僅支援至 5 人（5 人以 4 人費率計）。6 人以上已自動切換為包場。";
+            return;
+        }
+
+        let basePerPerson = 0, extraPerPerson = 0;
+        if (!holiday) {
+            if (peopleForRate === 1) { basePerPerson = 300; extraPerPerson = 70; }
+            else if (peopleForRate === 2) { basePerPerson = 250; extraPerPerson = 60; }
+            else if (peopleForRate === 3) { basePerPerson = 230; extraPerPerson = 50; }
+            else if (peopleForRate === 4) { basePerPerson = 200; extraPerPerson = 50; }
+        } else {
+            if (peopleForRate === 1) { basePerPerson = 350; extraPerPerson = 100; }
+            else if (peopleForRate === 2) { basePerPerson = 300; extraPerPerson = 90; }
+            else if (peopleForRate === 3) { basePerPerson = 270; extraPerPerson = 80; }
+            else if (peopleForRate === 4) { basePerPerson = 250; extraPerPerson = 80; }
+        }
+        const extraHours = Math.max(0, hour - 3);
+        base = basePerPerson * people;                // 以 peopleForRate 的單價，乘以「實際人數」（含 5 人）
+        extra = extraPerPerson * people * extraHours; // 同上
+        total = base + extra;
+    }
+
+    const perPerson = total / people;
+    const perPersonDisplay = Number.isInteger(perPerson) ? perPerson : perPerson.toFixed(2);
+
+    resultDiv.innerHTML = [
+        `方案：${finalMode === "banquet" ? "包場" : "大廳"}`,
+        `基礎費：${base} 元`,
+        `加時費：${extra} 元`,
+        `總金額：${total} 元`,
+        `每人金額：${perPersonDisplay} 元`
+    ].join("<br>");
+}
+
+/* --- 正規化/解析：只讀取下拉選單 --- */
+function normalizeWeekday() {
+    const v = weekdaySelect.value;
+    if (!v) return null;
+    const n = Number(v);
+    return (n >= 1 && n <= 7) ? n : null;
+}
+
+function normalizePeople() {
+    const v = peopleSelect.value;
+    if (!v) return null;
+    const n = Number(v);
+    return (n >= 1 && n <= 20) ? n : null;
+}
+
+function normalizeHour() {
+    const v = hourSelect.value;
+    if (!v) return null;
+    const n = Number(v);
+    return (n >= 3 && n <= 12) ? n : null;
+}
+
+/* --- 包場表（含 16~20 延伸） --- */
+function getBanquetBaseTotal(people, holiday) {
+    // 平日（1~15）
+    const weekdayTotal = {
+        1: 800, 2: 800, 3: 800, 4: 800,
+        5: 1000, 6: 1200,
+        7: 1330, 8: 1520,
+        9: 1620, 10: 1800,
+        11: 1870, 12: 2040,
+        13: 2080, 14: 2240,
+        15: 2250
+    };
+    // 假日（1~15）
+    const holidayTotal = {
+        1: 1500, 2: 1500, 3: 1500, 4: 1500, 5: 1500, 6: 1500,
+        7: 1680, 8: 1920,
+        9: 2070, 10: 2300,
+        11: 2420, 12: 2640,
+        13: 2730, 14: 2940,
+        15: 3000
+    };
+
+    if (people < 1 || people > 20) return null;
+    if (people <= 15) return (holiday ? holidayTotal[people] : weekdayTotal[people]);
+
+    // 16~20：延伸最後一級每人費率（平日=150/人、假日=200/人）
+    const perPersonRate = holiday ? 200 : 150;
+    return perPersonRate * people;
+}
+</script>
+</body>
+</html>
