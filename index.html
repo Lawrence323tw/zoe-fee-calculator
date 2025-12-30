@@ -368,6 +368,26 @@ function getBanquetBaseTotal(people, holiday) {
     const perPersonRate = holiday ? 200 : 150;
     return perPersonRate * people;
 }
+
+
+/* --- 頁面載入後，預設選擇今天星期幾 --- */
+document.addEventListener('DOMContentLoaded', () => {
+    // 取得本地星期（日=0，一=1…六=6）
+    const day0to6 = new Date().getDay();
+    // 轉成你的選單用的 1~7（1=一…7=日）
+    const day1to7 = day0to6 === 0 ? 7 : day0to6;
+
+    // 設定下拉選單的值
+    const weekdaySelect = document.getElementById('weekdaySelect');
+    if (weekdaySelect) {
+        weekdaySelect.value = String(day1to7);
+    }
+
+    // 如果你希望載入後就自動計算（僅當其他欄位已有值時）
+    // 可取消下一行的註解：
+    // calc();
+});
+
 </script>
 </body>
 </html>
