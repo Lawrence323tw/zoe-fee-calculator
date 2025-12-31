@@ -1,153 +1,29 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8" />
-    <title>佐境場租費計算器</title>
-    <!-- 讓手機正常縮放顯示，不會太小 -->
+    <title>場租費線上計算器（大廳／包場｜派對包場建議-修正版4）</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
     <style>
-        :root {
-            /* 調整整體字級與間距（行動裝置友善） */
-            --font-size: 16px;
-            --radius: 10px;
-            --gap: 12px;
-            --control-height: 44px;
-        }
-
-        /* 深色模式支援 */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                color-scheme: dark;
-            }
-            body {
-                background: #111;
-                color: #eee;
-            }
-            select, input, button {
-                background: #1c1c1c;
-                color: #eee;
-                border-color: #333;
-            }
-        }
-
-        body {
-            font-family: "Microsoft JhengHei", Arial, sans-serif;
-            line-height: 1.6;
-            padding: 16px;
-            font-size: var(--font-size);
-            -webkit-text-size-adjust: 100%; /* iOS 文字大小穩定 */
-        }
-
-        .container {
-            max-width: 680px;   /* 桌面上居中 */
-            margin: 0 auto;
-        }
-
-        h2 {
-            margin: 0 0 12px 0;
-            font-size: 1.25rem;
-        }
-
-        /* 區塊：每一列 */
-        .row {
-            display: grid;
-            grid-template-columns: 1fr; /* 手機：直排 */
-            gap: 8px;
-            margin: 10px 0;
-        }
-
-        /* 標籤在手機改為區塊，不固定寬度 */
-        label {
-            display: block;
-            font-weight: 600;
-        }
-
-        /* 控制元件一致的外觀與可點擊尺寸 */
-        select, input[type="radio"], button {
-            font-size: 1rem;
-        }
-        select {
-            width: 100%;
-            height: var(--control-height);
-            border-radius: var(--radius);
-            border: 1px solid #ccc;
-            padding: 0 12px;
-        }
-
-        /* 單選群組的外框 */
-        fieldset {
-            border: 1px solid #ddd;
-            border-radius: var(--radius);
-            padding: 10px 12px;
-        }
-        legend {
-            padding: 0 6px;
-            font-weight: 600;
-        }
-        .radio-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-        .radio-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 8px;
-            border-radius: 8px;
-            background: #f5f5f5;
-        }
-        @media (prefers-color-scheme: dark) {
-            .radio-item {
-                background: #222;
-            }
-        }
-
-        /* 按鈕 */
-        #calcBtn {
-            width: 100%;
-            height: var(--control-height);
-            border-radius: var(--radius);
-            border: none;
-            background: #2f7cf2;
-            color: white;
-            font-size: 1.05rem;
-            font-weight: 700;
-        }
-        #calcBtn:active {
-            transform: scale(0.995);
-        }
-
-        /* 結果 */
-        #result {
-            margin-top: 14px;
-            font-weight: bold;
-            line-height: 1.8;
-        }
-
-        /* 桌面/大螢幕優化：標籤與控制同列 */
-        @media (min-width: 560px) {
-            .row {
-                grid-template-columns: 160px 1fr; /* 左標籤 + 右控制 */
-                align-items: center;
-            }
-            label {
-                margin: 0; /* 恢復成左側標籤 */
-            }
-        }
-
-        /* 隱藏數字輸入的上下微調按鈕（保留現有行為） */
-        input[type=number]::-webkit-outer-spin-button,
-        input[type=number]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type=number] {
-            -moz-appearance: textfield; /* Firefox */
-            appearance: textfield;
-        }
+        :root { --font-size: 16px; --radius: 10px; --gap: 12px; --control-height: 44px; }
+        @media (prefers-color-scheme: dark) { :root { color-scheme: dark; } body { background: #111; color: #eee; } select, input, button { background: #1c1c1c; color: #eee; border-color: #333; } }
+        body { font-family: "Microsoft JhengHei", Arial, sans-serif; line-height: 1.6; padding: 16px; font-size: var(--font-size); -webkit-text-size-adjust: 100%; }
+        .container { max-width: 760px; margin: 0 auto; }
+        h2 { margin: 0 0 12px 0; font-size: 1.25rem; }
+        .row { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 10px 0; }
+        label { display: block; font-weight: 600; }
+        select, input[type="radio"], button { font-size: 1rem; }
+        select { width: 100%; height: var(--control-height); border-radius: var(--radius); border: 1px solid #ccc; padding: 0 12px; }
+        fieldset { border: 1px solid #ddd; border-radius: var(--radius); padding: 10px 12px; }
+        legend { padding: 0 6px; font-weight: 600; }
+        .radio-group { display: flex; flex-wrap: wrap; gap: 12px; }
+        .radio-item { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 8px; background: #f5f5f5; }
+        @media (prefers-color-scheme: dark) { .radio-item { background: #222; } }
+        #calcBtn { width: 100%; height: var(--control-height); border-radius: var(--radius); border: none; background: #2f7cf2; color: white; font-size: 1.05rem; font-weight: 700; }
+        #calcBtn:active { transform: scale(0.995); }
+        #result { margin-top: 14px; font-weight: bold; line-height: 1.8; }
+        @media (min-width: 560px) { .row { grid-template-columns: 160px 1fr; align-items: center; } label { margin: 0; } }
+        .strike { text-decoration: line-through; color: #888; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -169,7 +45,7 @@
             </div>
         </fieldset>
 
-        <!-- 星期（僅下拉） -->
+        <!-- 星期 -->
         <div class="row">
             <label for="weekdaySelect">星期</label>
             <select id="weekdaySelect">
@@ -184,28 +60,23 @@
             </select>
         </div>
 
-        <!-- 人數（僅下拉：1~20） -->
+        <!-- 人數（1~30） -->
         <div class="row">
             <label for="peopleSelect">人數</label>
             <select id="peopleSelect">
                 <option value="" selected disabled>請選擇</option>
-                <option value="1">1人</option><option value="2">2人</option><option value="3">3人</option><option value="4">4人</option>
-                <option value="5">5人</option><option value="6">6人</option><option value="7">7人</option><option value="8">8人</option>
-                <option value="9">9人</option><option value="10">10人</option><option value="11">11人</option><option value="12">12人</option>
-                <option value="13">13人</option><option value="14">14人</option><option value="15">15人</option><option value="16">16人</option>
-                <option value="17">17人</option><option value="18">18人</option><option value="19">19人</option><option value="20">20人</option>
+                <option value="1">1人</option><option value="2">2人</option><option value="3">3人</option><option value="4">4人</option><option value="5">5人</option><option value="6">6人</option><option value="7">7人</option><option value="8">8人</option><option value="9">9人</option><option value="10">10人</option><option value="11">11人</option><option value="12">12人</option><option value="13">13人</option><option value="14">14人</option><option value="15">15人</option><option value="16">16人</option><option value="17">17人</option><option value="18">18人</option><option value="19">19人</option><option value="20">20人</option><option value="21">21人</option><option value="22">22人</option><option value="23">23人</option><option value="24">24人</option><option value="25">25人</option><option value="26">26人</option><option value="27">27人</option><option value="28">28人</option><option value="29">29人</option><option value="30">30人</option>
             </select>
         </div>
 
-        <!-- 小時（僅下拉：3~12） -->
+        <!-- 小時（3~10） -->
         <div class="row">
             <label for="hourSelect">小時</label>
             <select id="hourSelect">
                 <option value="" selected disabled>請選擇</option>
                 <option value="3">3小時</option><option value="4">4小時</option><option value="5">5小時</option>
                 <option value="6">6小時</option><option value="7">7小時</option><option value="8">8小時</option>
-                <option value="9">9小時</option><option value="10">10小時</option><option value="11">11小時</option>
-                <option value="12">12小時</option>
+                <option value="9">9小時</option><option value="10">10小時</option>
             </select>
         </div>
 
@@ -214,13 +85,11 @@
     </div>
 
 <script>
-/* --- 取得元素 --- */
 const weekdaySelect = document.getElementById('weekdaySelect');
 const peopleSelect = document.getElementById('peopleSelect');
 const hourSelect = document.getElementById('hourSelect');
 const calcBtn = document.getElementById('calcBtn');
 
-/* --- 規則：選擇大廳且人數 >= 6，強制切換到包場 --- */
 peopleSelect.addEventListener('change', () => {
     const mode = document.querySelector('input[name="mode"]:checked')?.value;
     const peopleNum = normalizePeople();
@@ -231,163 +100,155 @@ peopleSelect.addEventListener('change', () => {
 
 calcBtn.addEventListener('click', calc);
 
-/* --- 主計算 --- */
+const MIN_PACKAGE_PEOPLE = 15;
+const PARTY_PACKAGE_HOURS = new Set([6, 8, 10]);
+function mapToPackageHour(hour) {
+    if (PARTY_PACKAGE_HOURS.has(hour)) return hour;
+    if (hour === 7) return 8;
+    if (hour === 9) return 10;
+    return null;
+}
+function getPartyPackagePrice(hour, holiday) {
+    const weekdayPackage = { 6: 3300, 8: 4500, 10: 5500 };
+    const holidayPackage = { 6: 4500, 8: 6000, 10: 7000 };
+    const table = holiday ? holidayPackage : weekdayPackage;
+    return table[hour] ?? null;
+}
+
 function calc() {
     const resultDiv = document.getElementById('result');
-    const mode = document.querySelector('input[name="mode"]:checked')?.value; // "hall" / "banquet"
+    const mode = document.querySelector('input[name="mode"]:checked')?.value;
+    const weekday = normalizeWeekday();
+    let people = normalizePeople();
+    let hour = normalizeHour();
 
-    const weekday = normalizeWeekday(); // 1~7
-    let people = normalizePeople();     // 1~20
-    const hour = normalizeHour();       // 3~12
-
-    // 若選擇大廳且人數 >= 6，強制切換到包場
     if (mode === 'hall' && people >= 6) {
         document.querySelector('input[name="mode"][value="banquet"]').checked = true;
     }
     const finalMode = document.querySelector('input[name="mode"]:checked')?.value;
 
-    // 檢核
-    if (!finalMode || weekday == null || people == null || hour == null) {
-        resultDiv.innerHTML = "輸入不完整或不正確。";
-        return;
-    }
-    if (people < 1 || people > 20) {
-        resultDiv.innerHTML = "人數需為 1–20。";
-        return;
-    }
-    if (hour < 3 || hour > 12) {
-        resultDiv.innerHTML = "小時需為 3–12。";
-        return;
-    }
+    if (!finalMode || weekday == null || people == null || hour == null) { resultDiv.innerHTML = "輸入不完整或不正確。"; return; }
+    if (people < 1 || people > 30) { resultDiv.innerHTML = "人數需為 1–30。"; return; }
+    if (hour < 3 || hour > 10) { resultDiv.innerHTML = "小時需為 3–10。"; return; }
 
-    const holiday = (weekday >= 6); // 6,7 為假日
-    let base = 0;   // 基礎費（不含加時）
-    let extra = 0;  // 加時費
-    let total = 0;
+    const holiday = (weekday >= 6);
 
-    if (finalMode === "banquet") {
-        // 包場：依「總金額表」計算基礎費，再加上加時費（第 4 小時起）
-        const baseTotal = getBanquetBaseTotal(people, holiday);
-        if (baseTotal == null) {
-            resultDiv.innerHTML = "包場人數超過上限（20 人）。";
-            return;
-        }
-        base = baseTotal;
-
-        const extraRatePerPerson = holiday ? 60 : 50; // 第 4 小時起
+    if (finalMode === 'banquet') {
+        const baseOriginal = getBanquetBaseTotal(people, holiday);
+        if (baseOriginal == null) { resultDiv.innerHTML = "包場人數超過上限（30 人）。"; return; }
+        const extraRatePerPerson = holiday ? 60 : 50;
         const extraHours = Math.max(0, hour - 3);
-        extra = extraRatePerPerson * people * extraHours;
-        total = base + extra;
-    } else { // 大廳
-        // 大廳：原則上 1–4 人；5 人用「4 人的每人價格」計算；6+ 強制包場（上面已切換）
-        let peopleForRate = people;
-        if (people === 5) peopleForRate = 4; // 用 4 人的每人價格（但仍乘以 5 人數）
-        if (people > 5) {
-            resultDiv.innerHTML = "大廳人數僅支援至 5 人（5 人以 4 人費率計）。6 人以上已自動切換為包場。";
-            return;
-        }
+        const extraOriginal = extraRatePerPerson * people * extraHours;
+        const totalOriginal = baseOriginal + extraOriginal;
 
-        let basePerPerson = 0, extraPerPerson = 0;
-        if (!holiday) {
-            if (peopleForRate === 1) { basePerPerson = 300; extraPerPerson = 70; }
-            else if (peopleForRate === 2) { basePerPerson = 250; extraPerPerson = 60; }
-            else if (peopleForRate === 3) { basePerPerson = 230; extraPerPerson = 50; }
-            else if (peopleForRate === 4) { basePerPerson = 200; extraPerPerson = 50; }
+        const packageHour = mapToPackageHour(hour);
+        const canApplyPackage = (people >= MIN_PACKAGE_PEOPLE) && (packageHour != null);
+
+        const lines = [];
+        const titleScheme = (people >= MIN_PACKAGE_PEOPLE) ? '派對包場' : '包場';
+        lines.push(`選擇方案：${titleScheme}`);
+
+        if (canApplyPackage) {
+            const packageBase = getPartyPackagePrice(packageHour, holiday);
+            const extraCount = Math.max(0, people - 15);
+            const extraPeopleFee = extraCount * (holiday ? 200 : 150);
+            const total = packageBase + extraPeopleFee;
+            const perPerson = Number.isInteger(total/people) ? (total/people) : (total/people).toFixed(2);
+
+            lines.push(`原價：<span class="strike">${totalOriginal} 元</span>`);
+            lines.push(`優惠價（${packageHour}H）= ${packageBase} 元`);
+            if (extraPeopleFee > 0) {
+                lines.push(`人數加價：${extraPeopleFee} 元`);
+            }
+            lines.push(`總金額：${total} 元`);
+            lines.push(`每人金額：${perPerson} 元`);
+            resultDiv.innerHTML = lines.join('<br>');
+            return;
         } else {
-            if (peopleForRate === 1) { basePerPerson = 350; extraPerPerson = 100; }
-            else if (peopleForRate === 2) { basePerPerson = 300; extraPerPerson = 90; }
-            else if (peopleForRate === 3) { basePerPerson = 270; extraPerPerson = 80; }
-            else if (peopleForRate === 4) { basePerPerson = 250; extraPerPerson = 80; }
+            lines.push(`基礎費：${baseOriginal} 元`);
+            lines.push(`加時費：${extraOriginal} 元`);
+            lines.push(`總金額：${totalOriginal} 元`);
+            const perPerson = Number.isInteger(totalOriginal/people) ? (totalOriginal/people) : (totalOriginal/people).toFixed(2);
+            lines.push(`每人金額：${perPerson} 元`);
+
+            if (packageHour != null) {
+                const packageBaseRef = getPartyPackagePrice(packageHour, holiday);
+                const extraCountRef = Math.max(0, people - 15);
+                const extraPeopleFeeRef = extraCountRef * (holiday ? 200 : 150);
+                const packageTotalRef = packageBaseRef + extraPeopleFeeRef;
+                if (packageTotalRef < totalOriginal) {                   
+		const save = totalOriginal - packageTotalRef;
+		const perPersonRef = Number.isInteger(packageTotalRef / people)
+  		? (packageTotalRef / people)
+		: (packageTotalRef / people).toFixed(2);
+
+		// ✅ 每一項獨立一行，最後用真正的 <br> 合併
+		lines.push('<br><strong>建議方案：派對包場</strong>');
+		lines.push('原價：<span class="strike">' + totalOriginal + ' 元</span>');
+		lines.push('優惠價（' + packageHour + 'H）= ' + packageTotalRef + ' 元');
+		lines.push('人數：' + people + '人');
+		lines.push('每人金額：' + perPersonRef + ' 元');
+		lines.push('（比原方案省下 ' + save + ' 元）');
+
+                }
+            }
+            resultDiv.innerHTML = lines.join('<br>');
+            return;
         }
-        const extraHours = Math.max(0, hour - 3);
-        base = basePerPerson * people;                // 以 peopleForRate 的單價，乘以「實際人數」（含 5 人）
-        extra = extraPerPerson * people * extraHours; // 同上
-        total = base + extra;
     }
 
-    const perPerson = total / people;
-    const perPersonDisplay = Number.isInteger(perPerson) ? perPerson : perPerson.toFixed(2);
+    // 大廳
+    let peopleForRate = people;
+    if (people === 5) peopleForRate = 4;
+    if (people > 5) { document.getElementById('result').innerHTML = "大廳人數僅支援至 5 人（5 人以 4 人費率計）。6 人以上已自動切換為包場。"; return; }
 
-    resultDiv.innerHTML = [
-        `方案：${finalMode === "banquet" ? "包場" : "大廳"}`,
+    let basePerPerson = 0, extraPerPerson = 0;
+    const holiday2 = (weekday >= 6);
+    if (!holiday2) {
+        if (peopleForRate === 1) { basePerPerson = 300; extraPerPerson = 70; }
+        else if (peopleForRate === 2) { basePerPerson = 250; extraPerPerson = 60; }
+        else if (peopleForRate === 3) { basePerPerson = 230; extraPerPerson = 50; }
+        else if (peopleForRate === 4) { basePerPerson = 200; extraPerPerson = 50; }
+    } else {
+        if (peopleForRate === 1) { basePerPerson = 350; extraPerPerson = 100; }
+        else if (peopleForRate === 2) { basePerPerson = 300; extraPerPerson = 90; }
+        else if (peopleForRate === 3) { basePerPerson = 270; extraPerPerson = 80; }
+        else if (peopleForRate === 4) { basePerPerson = 250; extraPerPerson = 80; }
+    }
+    const extraHours = Math.max(0, hour - 3);
+    const base = basePerPerson * people;
+    const extra = extraPerPerson * people * extraHours;
+    const total = base + extra;
+    const perPerson = Number.isInteger(total/people) ? (total/people) : (total/people).toFixed(2);
+    document.getElementById('result').innerHTML = [
+        `選擇方案：大廳`,
         `基礎費：${base} 元`,
         `加時費：${extra} 元`,
         `總金額：${total} 元`,
-        `每人金額：${perPersonDisplay} 元`
-    ].join("<br>");
+        `每人金額：${perPerson} 元`
+    ].join('<br>');
 }
 
-/* --- 正規化/解析：只讀取下拉選單 --- */
-function normalizeWeekday() {
-    const v = weekdaySelect.value;
-    if (!v) return null;
-    const n = Number(v);
-    return (n >= 1 && n <= 7) ? n : null;
-}
+function normalizeWeekday() { const v = weekdaySelect.value; if (!v) return null; const n = Number(v); return (n >= 1 && n <= 7) ? n : null; }
+function normalizePeople() { const v = peopleSelect.value; if (!v) return null; const n = Number(v); return (n >= 1 && n <= 30) ? n : null; }
+function normalizeHour() { const v = hourSelect.value; if (!v) return null; const n = Number(v); return (n >= 3 && n <= 10) ? n : null; }
 
-function normalizePeople() {
-    const v = peopleSelect.value;
-    if (!v) return null;
-    const n = Number(v);
-    return (n >= 1 && n <= 20) ? n : null;
-}
-
-function normalizeHour() {
-    const v = hourSelect.value;
-    if (!v) return null;
-    const n = Number(v);
-    return (n >= 3 && n <= 12) ? n : null;
-}
-
-/* --- 包場表（含 16~20 延伸） --- */
 function getBanquetBaseTotal(people, holiday) {
-    // 平日（1~15）
-    const weekdayTotal = {
-        1: 800, 2: 800, 3: 800, 4: 800,
-        5: 1000, 6: 1200,
-        7: 1330, 8: 1520,
-        9: 1620, 10: 1800,
-        11: 1870, 12: 2040,
-        13: 2080, 14: 2240,
-        15: 2250
-    };
-    // 假日（1~15）
-    const holidayTotal = {
-        1: 1500, 2: 1500, 3: 1500, 4: 1500, 5: 1500, 6: 1500,
-        7: 1680, 8: 1920,
-        9: 2070, 10: 2300,
-        11: 2420, 12: 2640,
-        13: 2730, 14: 2940,
-        15: 3000
-    };
-
-    if (people < 1 || people > 20) return null;
+    const weekdayTotal = { 1:800, 2:800, 3:800, 4:800, 5:1000, 6:1200, 7:1330, 8:1520, 9:1620, 10:1800, 11:1870, 12:2040, 13:2080, 14:2240, 15:2250 };
+    const holidayTotal = { 1:1500, 2:1500, 3:1500, 4:1500, 5:1500, 6:1500, 7:1680, 8:1920, 9:2070, 10:2300, 11:2420, 12:2640, 13:2730, 14:2940, 15:3000 };
+    if (people < 1 || people > 30) return null;
     if (people <= 15) return (holiday ? holidayTotal[people] : weekdayTotal[people]);
-
-    // 16~20：延伸最後一級每人費率（平日=150/人、假日=200/人）
-    const perPersonRate = holiday ? 200 : 150;
+    const perPersonRate = holiday ? 200 : 150; // 16~30 人延伸
     return perPersonRate * people;
 }
 
-
-/* --- 頁面載入後，預設選擇今天星期幾 --- */
+// 頁面載入後預設星期
 document.addEventListener('DOMContentLoaded', () => {
-    // 取得本地星期（日=0，一=1…六=6）
     const day0to6 = new Date().getDay();
-    // 轉成你的選單用的 1~7（1=一…7=日）
     const day1to7 = day0to6 === 0 ? 7 : day0to6;
-
-    // 設定下拉選單的值
     const weekdaySelect = document.getElementById('weekdaySelect');
-    if (weekdaySelect) {
-        weekdaySelect.value = String(day1to7);
-    }
-
-    // 如果你希望載入後就自動計算（僅當其他欄位已有值時）
-    // 可取消下一行的註解：
-    // calc();
+    if (weekdaySelect) { weekdaySelect.value = String(day1to7); }
 });
-
 </script>
 </body>
 </html>
