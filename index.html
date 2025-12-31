@@ -1,12 +1,17 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8" />
-    <title>場租費線上計算器（大廳／包場｜派對包場建議-修正版4）</title>
+    <title>場租費線上計算器（大廳／包場｜派對包場建議-修正版5）</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
         :root { --font-size: 16px; --radius: 10px; --gap: 12px; --control-height: 44px; }
-        @media (prefers-color-scheme: dark) { :root { color-scheme: dark; } body { background: #111; color: #eee; } select, input, button { background: #1c1c1c; color: #eee; border-color: #333; } }
+        @media (prefers-color-scheme: dark) { 
+            :root { color-scheme: dark; } 
+            body { background: #111; color: #eee; } 
+            select, input, button { background: #1c1c1c; color: #eee; border-color: #333; } 
+        }
         body { font-family: "Microsoft JhengHei", Arial, sans-serif; line-height: 1.6; padding: 16px; font-size: var(--font-size); -webkit-text-size-adjust: 100%; }
         .container { max-width: 760px; margin: 0 auto; }
         h2 { margin: 0 0 12px 0; font-size: 1.25rem; }
@@ -65,7 +70,12 @@
             <label for="peopleSelect">人數</label>
             <select id="peopleSelect">
                 <option value="" selected disabled>請選擇</option>
-                <option value="1">1人</option><option value="2">2人</option><option value="3">3人</option><option value="4">4人</option><option value="5">5人</option><option value="6">6人</option><option value="7">7人</option><option value="8">8人</option><option value="9">9人</option><option value="10">10人</option><option value="11">11人</option><option value="12">12人</option><option value="13">13人</option><option value="14">14人</option><option value="15">15人</option><option value="16">16人</option><option value="17">17人</option><option value="18">18人</option><option value="19">19人</option><option value="20">20人</option><option value="21">21人</option><option value="22">22人</option><option value="23">23人</option><option value="24">24人</option><option value="25">25人</option><option value="26">26人</option><option value="27">27人</option><option value="28">28人</option><option value="29">29人</option><option value="30">30人</option>
+                <option value="1">1人</option><option value="2">2人</option><option value="3">3人</option><option value="4">4人</option><option value="5">5人</option>
+                <option value="6">6人</option><option value="7">7人</option><option value="8">8人</option><option value="9">9人</option><option value="10">10人</option>
+                <option value="11">11人</option><option value="12">12人</option><option value="13">13人</option><option value="14">14人</option><option value="15">15人</option>
+                <option value="16">16人</option><option value="17">17人</option><option value="18">18人</option><option value="19">19人</option><option value="20">20人</option>
+                <option value="21">21人</option><option value="22">22人</option><option value="23">23人</option><option value="24">24人</option><option value="25">25人</option>
+                <option value="26">26人</option><option value="27">27人</option><option value="28">28人</option><option value="29">29人</option><option value="30">30人</option>
             </select>
         </div>
 
@@ -102,6 +112,7 @@ calcBtn.addEventListener('click', calc);
 
 const MIN_PACKAGE_PEOPLE = 15;
 const PARTY_PACKAGE_HOURS = new Set([6, 8, 10]);
+
 function mapToPackageHour(hour) {
     if (PARTY_PACKAGE_HOURS.has(hour)) return hour;
     if (hour === 7) return 8;
@@ -146,52 +157,63 @@ function calc() {
 
         const lines = [];
         const titleScheme = (people >= MIN_PACKAGE_PEOPLE) ? '派對包場' : '包場';
-        lines.push(`選擇方案：${titleScheme}`);
+        // 不管是否可套用派對包場，這裡的顯示都控制在 else 分支（不可直接套用）先顯示建議，再顯示原方案
 
         if (canApplyPackage) {
+            // 可直接套用派對包場：仍採分行（原價 / 優惠價）格式
             const packageBase = getPartyPackagePrice(packageHour, holiday);
             const extraCount = Math.max(0, people - 15);
             const extraPeopleFee = extraCount * (holiday ? 200 : 150);
             const total = packageBase + extraPeopleFee;
             const perPerson = Number.isInteger(total/people) ? (total/people) : (total/people).toFixed(2);
 
-            lines.push(`原價：<span class="strike">${totalOriginal} 元</span>`);
-            lines.push(`優惠價（${packageHour}H）= ${packageBase} 元`);
-            if (extraPeopleFee > 0) {
-                lines.push(`人數加價：${extraPeopleFee} 元`);
-            }
-            lines.push(`總金額：${total} 元`);
-            lines.push(`每人金額：${perPerson} 元`);
-            resultDiv.innerHTML = lines.join('<br>');
+            // 這裡顯示「選擇方案：派對包場」的最終價格（因為已適用派對包場）
+            const parts = [
+                `選擇方案：派對包場`,
+                `原價：<span class="strike">${totalOriginal} 元</span>`,
+                `優惠價（${packageHour}H）：${packageBase} 元`,
+                (extraPeopleFee > 0 ? `人數加價：${extraPeopleFee} 元` : ''),
+                `總金額：${total} 元`,
+                `每人金額：${perPerson} 元`
+            ].filter(Boolean);
+            resultDiv.innerHTML = parts.join('<br>');
             return;
         } else {
-            lines.push(`基礎費：${baseOriginal} 元`);
-            lines.push(`加時費：${extraOriginal} 元`);
-            lines.push(`總金額：${totalOriginal} 元`);
-            const perPerson = Number.isInteger(totalOriginal/people) ? (totalOriginal/people) : (totalOriginal/people).toFixed(2);
-            lines.push(`每人金額：${perPerson} 元`);
+            // 不可直接套用派對包場：先顯示建議方案，再顯示原方案（你指定的順序與換行）
+            // 原方案（包場）計算
+            const perPersonOriginal = Number.isInteger(totalOriginal/people) ? (totalOriginal/people) : (totalOriginal/people).toFixed(2);
 
+            // 建議方案試算（若更便宜就顯示）
             if (packageHour != null) {
                 const packageBaseRef = getPartyPackagePrice(packageHour, holiday);
                 const extraCountRef = Math.max(0, people - 15);
                 const extraPeopleFeeRef = extraCountRef * (holiday ? 200 : 150);
                 const packageTotalRef = packageBaseRef + extraPeopleFeeRef;
-                if (packageTotalRef < totalOriginal) {                   
-		const save = totalOriginal - packageTotalRef;
-		const perPersonRef = Number.isInteger(packageTotalRef / people)
-  		? (packageTotalRef / people)
-		: (packageTotalRef / people).toFixed(2);
 
-		// ✅ 每一項獨立一行，最後用真正的 <br> 合併
-		lines.push('<br><strong>建議方案：派對包場</strong>');
-		lines.push('原價：<span class="strike">' + totalOriginal + ' 元</span>');
-		lines.push('優惠價（' + packageHour + 'H）= ' + packageTotalRef + ' 元');
-		lines.push('人數：' + people + '人');
-		lines.push('每人金額：' + perPersonRef + ' 元');
-		lines.push('（比原方案省下 ' + save + ' 元）');
+                if (packageTotalRef < totalOriginal) {
+                    const save = totalOriginal - packageTotalRef;
+                    const perPersonRef = Number.isInteger(packageTotalRef / people)
+                        ? (packageTotalRef / people)
+                        : (packageTotalRef / people).toFixed(2);
 
+                    // ✅ 先顯示建議方案：第一行只顯示「建議方案：派對包場」，第二行開始分行
+                    lines.push(`建議方案：派對包場`);
+                    lines.push(`原價：<span class="strike">${totalOriginal} 元</span>`);
+                    lines.push(`優惠價（${packageHour}H）：${packageTotalRef} 元`);
+                    lines.push(`人數：${people}人`);
+                    lines.push(`每人金額：${perPersonRef} 元`);
+                    lines.push(`（比原方案省下 ${save} 元）`);
+                    lines.push(''); // 空行分隔
                 }
             }
+
+            // ✅ 再顯示原方案：包場
+            lines.push(`選擇方案：包場`);
+            lines.push(`基礎費：${baseOriginal} 元`);
+            lines.push(`加時費：${extraOriginal} 元`);
+            lines.push(`總金額：${totalOriginal} 元`);
+            lines.push(`每人金額：${perPersonOriginal} 元`);
+
             resultDiv.innerHTML = lines.join('<br>');
             return;
         }
