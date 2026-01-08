@@ -7,10 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
         :root { --font-size: 16px; --radius: 10px; --gap: 12px; --control-height: 44px; }
-        @media (prefers-color-scheme: dark) { 
-            :root { color-scheme: dark; } 
-            body { background: #111; color: #eee; } 
-            select, input, button { background: #1c1c1c; color: #eee; border-color: #333; } 
+        @media (prefers-color-scheme: dark) {
+            :root { color-scheme: dark; }
+            body { background: #111; color: #eee; }
+            select, input, button { background: #1c1c1c; color: #eee; border-color: #333; }
         }
         body { font-family: "Microsoft JhengHei", Arial, sans-serif; line-height: 1.6; padding: 16px; font-size: var(--font-size); -webkit-text-size-adjust: 100%; }
         .container { max-width: 760px; margin: 0 auto; }
@@ -157,17 +157,14 @@ function calc() {
 
         const lines = [];
         const titleScheme = (people >= MIN_PACKAGE_PEOPLE) ? '派對包場' : '包場';
-        // 不管是否可套用派對包場，這裡的顯示都控制在 else 分支（不可直接套用）先顯示建議，再顯示原方案
 
         if (canApplyPackage) {
-            // 可直接套用派對包場：仍採分行（原價 / 優惠價）格式
             const packageBase = getPartyPackagePrice(packageHour, holiday);
             const extraCount = Math.max(0, people - 15);
             const extraPeopleFee = extraCount * (holiday ? 200 : 150);
             const total = packageBase + extraPeopleFee;
             const perPerson = Number.isInteger(total/people) ? (total/people) : (total/people).toFixed(2);
 
-            // 這裡顯示「選擇方案：派對包場」的最終價格（因為已適用派對包場）
             const parts = [
                 `選擇方案：派對包場`,
                 `原價：<span class="strike">${totalOriginal} 元</span>`,
@@ -179,11 +176,8 @@ function calc() {
             resultDiv.innerHTML = parts.join('<br>');
             return;
         } else {
-            // 不可直接套用派對包場：先顯示建議方案，再顯示原方案（你指定的順序與換行）
-            // 原方案（包場）計算
             const perPersonOriginal = Number.isInteger(totalOriginal/people) ? (totalOriginal/people) : (totalOriginal/people).toFixed(2);
 
-            // 建議方案試算（若更便宜就顯示）
             if (packageHour != null) {
                 const packageBaseRef = getPartyPackagePrice(packageHour, holiday);
                 const extraCountRef = Math.max(0, people - 15);
@@ -196,18 +190,16 @@ function calc() {
                         ? (packageTotalRef / people)
                         : (packageTotalRef / people).toFixed(2);
 
-                    // ✅ 先顯示建議方案：第一行只顯示「建議方案：派對包場」，第二行開始分行
                     lines.push(`建議方案：派對包場`);
                     lines.push(`原價：<span class="strike">${totalOriginal} 元</span>`);
                     lines.push(`優惠價（${packageHour}H）：${packageTotalRef} 元`);
                     lines.push(`人數：${people}人`);
                     lines.push(`每人金額：${perPersonRef} 元`);
                     lines.push(`（比原方案省下 ${save} 元）`);
-                    lines.push(''); // 空行分隔
+                    lines.push('');
                 }
             }
 
-            // ✅ 再顯示原方案：包場
             lines.push(`原方案：包場`);
             lines.push(`基礎費：${baseOriginal} 元`);
             lines.push(`加時費：${extraOriginal} 元`);
@@ -219,10 +211,14 @@ function calc() {
         }
     }
 
-    // 大廳
+    // 大廳（已加入「包場比較」建議）
     let peopleForRate = people;
     if (people === 5) peopleForRate = 4;
-    if (people > 5) { document.getElementById('result').innerHTML = "大廳人數僅支援至 5 人（5 人以 4 人費率計）。6 人以上已自動切換為包場。"; return; }
+    if (people > 5) {
+        document.getElementById('result').innerHTML =
+            "大廳人數僅支援至 5 人（5 人以 4 人費率計）。6 人以上已自動切換為包場。";
+        return;
+    }
 
     let basePerPerson = 0, extraPerPerson = 0;
     const holiday2 = (weekday >= 6);
@@ -240,14 +236,45 @@ function calc() {
     const extraHours = Math.max(0, hour - 3);
     const base = basePerPerson * people;
     const extra = extraPerPerson * people * extraHours;
-    const total = base + extra;
-    const perPerson = Number.isInteger(total/people) ? (total/people) : (total/people).toFixed(2);
+    const hallTotal = base + extra;
+    const perPersonHall = Number.isInteger(hallTotal/people) ? (hallTotal/people) : (hallTotal/people).toFixed(2);
+
+    // 🔄 同步試算「包場」並與大廳比較
+    const banquetBase = getBanquetBaseTotal(people, holiday2);
+    const banquetExtra = (holiday2 ? 60 : 50) * people * extraHours;
+    const banquetTotal = (banquetBase != null) ? (banquetBase + banquetExtra) : null;
+
+    if (banquetTotal != null && banquetTotal < hallTotal) {
+        const save = hallTotal - banquetTotal;
+        const perPersonBanquet = Number.isInteger(banquetTotal / people)
+            ? (banquetTotal / people)
+            : (banquetTotal / people).toFixed(2);
+
+        const lines = [];
+        lines.push(`建議方案：包場`);
+        lines.push(`原價：<span class="strike">${hallTotal} 元</span>`);
+        lines.push(`包場價（${hour}H）：${banquetTotal} 元`);
+        lines.push(`人數：${people}人`);
+        lines.push(`每人金額：${perPersonBanquet} 元`);
+        lines.push(`（比原方案省下 ${save} 元）`);
+        lines.push('');
+
+        lines.push(`原方案：大廳`);
+        lines.push(`基礎費：${base} 元`);
+        lines.push(`加時費：${extra} 元`);
+        lines.push(`總金額：${hallTotal} 元`);
+        lines.push(`每人金額：${perPersonHall} 元`);
+
+        document.getElementById('result').innerHTML = lines.join('<br>');
+        return;
+    }
+
     document.getElementById('result').innerHTML = [
         `選擇方案：大廳`,
         `基礎費：${base} 元`,
         `加時費：${extra} 元`,
-        `總金額：${total} 元`,
-        `每人金額：${perPerson} 元`
+        `總金額：${hallTotal} 元`,
+        `每人金額：${perPersonHall} 元`
     ].join('<br>');
 }
 
