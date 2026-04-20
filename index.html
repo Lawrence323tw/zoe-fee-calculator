@@ -200,14 +200,37 @@ function calc() {
                 }
             }
 
-            lines.push(`原方案：包場`);
-            lines.push(`基礎費：${baseOriginal} 元`);
-            lines.push(`加時費：${extraOriginal} 元`);
-            lines.push(`總金額：${totalOriginal} 元`);
-            lines.push(`每人金額：${perPersonOriginal} 元`);
+            	
+lines.push(`方案：包場`);
+lines.push(`基礎費：${baseOriginal} 元`);
+lines.push(`加時費：${extraOriginal} 元`);
+lines.push(`總金額：${totalOriginal} 元`);
+lines.push(`每人金額：${perPersonOriginal} 元`);
 
-            resultDiv.innerHTML = lines.join('<br>');
-            return;
+/* ✅ 平日白天優惠（只顯示，不取代） */
+if (!holiday && people <= 5) {
+    let discountBase = 0;
+    if (people <= 4) discountBase = 800;
+    else if (people === 5) discountBase = 1000;
+
+    const discountExtra = extraRatePerPerson * people * extraHours;
+    const discountTotal = discountBase + discountExtra;
+    const discountPerPerson =
+        Number.isInteger(discountTotal / people)
+            ? (discountTotal / people)
+            : (discountTotal / people).toFixed(2);
+
+    lines.push('');
+    lines.push(`🎉【平日 11~19 點限定優惠】🎉`);
+    lines.push(`方案：包場`);
+    lines.push(`基礎費：${discountBase} 元`);
+    lines.push(`加時費：${discountExtra} 元`);
+    lines.push(`總金額：${discountTotal} 元`);
+    lines.push(`每人金額：${discountPerPerson} 元`);
+}
+
+resultDiv.innerHTML = lines.join('<br>');
+return;
         }
     }
 
@@ -270,7 +293,7 @@ function calc() {
     }
 
     document.getElementById('result').innerHTML = [
-        `選擇方案：大廳`,
+        `方案：大廳`,
         `基礎費：${base} 元`,
         `加時費：${extra} 元`,
         `總金額：${hallTotal} 元`,
@@ -283,7 +306,7 @@ function normalizePeople() { const v = peopleSelect.value; if (!v) return null; 
 function normalizeHour() { const v = hourSelect.value; if (!v) return null; const n = Number(v); return (n >= 3 && n <= 10) ? n : null; }
 
 function getBanquetBaseTotal(people, holiday) {
-    const weekdayTotal = { 1:800, 2:800, 3:800, 4:800, 5:1000, 6:1200, 7:1330, 8:1520, 9:1620, 10:1800, 11:1870, 12:2040, 13:2080, 14:2240, 15:2250 };
+    const weekdayTotal = { 1:1200, 2:1200, 3:1200, 4:1200, 5:1200, 6:1200, 7:1330, 8:1520, 9:1620, 10:1800, 11:1870, 12:2040, 13:2080, 14:2240, 15:2250 };
     const holidayTotal = { 1:1500, 2:1500, 3:1500, 4:1500, 5:1500, 6:1500, 7:1680, 8:1920, 9:2070, 10:2300, 11:2420, 12:2640, 13:2730, 14:2940, 15:3000 };
     if (people < 1 || people > 30) return null;
     if (people <= 15) return (holiday ? holidayTotal[people] : weekdayTotal[people]);
