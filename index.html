@@ -202,8 +202,12 @@ function calc() {
 
             	
 lines.push(`方案：包場`);
-lines.push(`基礎費：${baseOriginal} 元`);
-lines.push(`加時費：${extraOriginal} 元`);
+
+if (hour > 3) {
+    lines.push(`基礎費：${baseOriginal} 元`);
+    lines.push(`加時費：${extraOriginal} 元`);
+}
+
 lines.push(`總金額：${totalOriginal} 元`);
 lines.push(`每人金額：${perPersonOriginal} 元`);
 
@@ -223,8 +227,12 @@ if (!holiday && people <= 5) {
     lines.push('');
     lines.push(`🎉【平日 11~19 點限定優惠】🎉`);
     lines.push(`方案：包場`);
+
+if (hour > 3) {
     lines.push(`基礎費：${discountBase} 元`);
     lines.push(`加時費：${discountExtra} 元`);
+}
+
     lines.push(`總金額：${discountTotal} 元`);
     lines.push(`每人金額：${discountPerPerson} 元`);
 }
